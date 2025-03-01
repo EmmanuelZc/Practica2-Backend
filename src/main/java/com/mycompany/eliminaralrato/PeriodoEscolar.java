@@ -107,7 +107,7 @@ public class PeriodoEscolar implements Serializable {
           pe.setNombre("2025-2");
           
           ProgramaAcademico pa = new ProgramaAcademico();
-          pa.setIdProgramaAcademico(1);
+//          pa.setIdProgramaAcademico(1);
           pa.setNombre("ISC");
           pe.addPrograma(pa);
           pa.setDescripcion("aaaaa");
