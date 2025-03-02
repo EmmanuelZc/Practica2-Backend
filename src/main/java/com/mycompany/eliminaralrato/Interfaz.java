@@ -182,21 +182,35 @@ public class Interfaz {
             }
         });
 
-        btnBuscar.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String clavetx = JOptionPane.showInputDialog("Ingrese la clave:");
+         btnBuscar.addActionListener(e -> {
+            String clavetx = JOptionPane.showInputDialog("Ingrese la clave:");
+
+            try {
                 Long clave = Long.parseLong(clavetx);
-                ProgramaAcademico programa = new ProgramaAcademico();
                 ProgramaAcademicoDAO dao = new ProgramaAcademicoDAO();
-                List<ProgramaAcademico> programaSeleccionado =  dao.SelectByClave(clave);
-                
-                System.out.println(programaSeleccionado);
-                
-                
+                List<ProgramaAcademico> programaSeleccionado = dao.SelectByClave(clave);
+
+                modeloTabla.setRowCount(0);
+
+                if (programaSeleccionado.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "No se encontraron resultados", "Búsqueda", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    for (ProgramaAcademico programa : programaSeleccionado) {
+                        SimpleDateFormat formatoFecha = new SimpleDateFormat("yyyy-MM-dd");
+                        String fechaFormateada = formatoFecha.format(programa.getFechaCreacion());
+
+                        modeloTabla.addRow(new Object[]{
+                            programa.getClave(),
+                            programa.getNombre(),
+                            programa.getDescripcion(),
+                            fechaFormateada
+                        });
+                    }
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(null, "Ingrese un número válido para la clave", "Error", JOptionPane.ERROR_MESSAGE);
             }
-            
-        });  
+        }); 
         
         
         btnEliminar.addActionListener(new ActionListener() {
