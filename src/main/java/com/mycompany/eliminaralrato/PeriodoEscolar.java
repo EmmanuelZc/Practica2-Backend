@@ -111,7 +111,6 @@ public class PeriodoEscolar implements Serializable {
           pa.setNombre("ISC");
           pe.addPrograma(pa);
           pa.setDescripcion("aaaaa");
-          pa.setPlan("ISC-2020");
           System.out.println("Periodo: " + pe.getIdPeriodoEscolar());
           System.out.println("Nombre: " + pe.getNombre());
           System.out.println("Programas disponibles: " + pe.getProgramas());

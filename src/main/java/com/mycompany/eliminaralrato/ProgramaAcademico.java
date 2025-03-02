@@ -1,16 +1,27 @@
 package com.mycompany.eliminaralrato;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Objects;
 
 class ProgramaAcademico implements Serializable{
-    private Long idProgramaAcademico;
+    private Long clave;
+    
     private String nombre;
     private String descripcion;
-    private String plan;
+    private Date fechaCreacion;
+    private int status;
     private PeriodoEscolar periodoEscolar;
-    private boolean status;
+    
     public ProgramaAcademico() {}
+    
+     public ProgramaAcademico(Long clave,String nombre, String descripcion, Date fechaCreacion, int status) {
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+        this.fechaCreacion = fechaCreacion;
+        this.status = status;
+        this.clave = clave;
+    }
     
     public PeriodoEscolar getPeriodoEscolar() {
         return periodoEscolar;
@@ -20,21 +31,23 @@ class ProgramaAcademico implements Serializable{
         this.periodoEscolar = periodoEscolar;
     }
 
-    public boolean isStatus() {
+    public Date getFechaCreacion() {
+        return fechaCreacion;
+    }
+
+    public void setFechaCreacion(Date fechaCreacion) {
+        this.fechaCreacion = fechaCreacion;
+    }
+
+    public int getStatus() {
         return status;
     }
 
-    public void setStatus(boolean status) {
+    public void setStatus(int status) {
         this.status = status;
     }
 
-    public Long getIdProgramaAcademico() {
-        return idProgramaAcademico;
-    }
-
-    public void setIdProgramaAcademico(Long idProgramaAcademico) {
-        this.idProgramaAcademico = idProgramaAcademico;
-    }
+   
 
     public String getNombre() {
         return nombre;
@@ -52,22 +65,24 @@ class ProgramaAcademico implements Serializable{
         this.descripcion = descripcion;
     }
 
-    public String getPlan() {
-        return plan;
+    public Long getClave() {
+        return clave;
     }
 
-    public void setPlan(String plan) {
-        this.plan = plan;
+    public void setClave(Long clave) {
+        this.clave = clave;
     }
+
+    
     
      @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("ProgramaAcademico{");
-        sb.append("idProgramaAcademico=").append(idProgramaAcademico);
+
         sb.append(", nombre='").append(nombre).append('\'');
         sb.append(", descripcion='").append(descripcion).append('\'');
-        sb.append(", plan='").append(plan).append('\'');
+
         sb.append('}');
         return sb.toString();
     }
@@ -76,7 +91,7 @@ class ProgramaAcademico implements Serializable{
     @Override
     public int hashCode() {
         int hash = 5;
-        hash = (int) (79 * hash + this.idProgramaAcademico);
+        hash = (int) (79 * hash + this.clave);
         return hash;
     }
 
@@ -85,6 +100,6 @@ class ProgramaAcademico implements Serializable{
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         ProgramaAcademico that = (ProgramaAcademico) obj;
-        return idProgramaAcademico == that.idProgramaAcademico ;
+        return clave == that.clave ;
     }
 }

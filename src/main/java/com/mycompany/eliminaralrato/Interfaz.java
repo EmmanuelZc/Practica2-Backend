@@ -6,19 +6,23 @@ import java.awt.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 public class Interfaz {
+    private DefaultTableModel modeloTabla;  
+
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                crearVentana();
+                new Interfaz().crearVentana();  
             }
         });
     }
 
-    private static void crearVentana() {
+    private void crearVentana() {
         // Crear la ventana principal
         JFrame ventana = new JFrame("Programas Académicos");
         ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -26,10 +30,12 @@ public class Interfaz {
 
         // Crear un panel para organizar los campos de texto
         JPanel panelCampos = new JPanel();
-        panelCampos.setLayout(new GridBagLayout()); // Usamos GridBagLayout para un mejor control
+        panelCampos.setLayout(new GridBagLayout()); 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5); // Espaciado entre los componentes
-
+        gbc.insets = new Insets(5, 5, 5, 5); 
+        
+       
+        
         // Campos de texto
         JLabel lblClave = new JLabel("Clave:");
         JTextField txtClave = new JTextField(20);
@@ -39,48 +45,34 @@ public class Interfaz {
         JTextField txtDescripcion = new JTextField(20);
         JLabel lblFecha = new JLabel("Fecha:");
 
-        // Campo para mostrar la fecha seleccionada
         JTextField txtFecha = new JTextField(20);
-        txtFecha.setEnabled(false); // Este campo solo se usará para mostrar la fecha seleccionada.
+        txtFecha.setEnabled(false);
 
-        // Crear un botón para elegir la fecha
         JButton btnElegirFecha = new JButton("Elegir Fecha");
-
-        // Crear el calendario (JCalendar)
         JCalendar calendario = new JCalendar();
-        calendario.setPreferredSize(new Dimension(250, 250)); // Ajustar el tamaño
-        calendario.setTodayButtonVisible(true); // Muestra el botón de "Hoy"
+        calendario.setPreferredSize(new Dimension(250, 250));
+        calendario.setTodayButtonVisible(true);
 
-        // Crear un JDialog para mostrar el calendario cuando el botón "Elegir Fecha" sea presionado
         JDialog dialogoCalendario = new JDialog(ventana, "Seleccionar Fecha", true);
         dialogoCalendario.setSize(350, 350);
         dialogoCalendario.setLayout(new BorderLayout());
         dialogoCalendario.add(calendario, BorderLayout.CENTER);
 
-        // Botón para seleccionar la fecha en el calendario
         JButton btnSeleccionar = new JButton("Seleccionar");
-        btnSeleccionar.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Al seleccionar una fecha, actualizar el campo de texto con la fecha elegida
-                Date fechaSeleccionada = calendario.getDate();
-                txtFecha.setText(fechaSeleccionada.toString());
-                dialogoCalendario.dispose(); // Cerrar el JDialog del calendario
-            }
+        btnSeleccionar.addActionListener(e -> {
+            Date fechaSeleccionada = calendario.getDate();
+            SimpleDateFormat formatoFecha = new SimpleDateFormat("yyyy-MM-dd");
+            txtFecha.setText(formatoFecha.format(fechaSeleccionada));
+            dialogoCalendario.dispose();
         });
 
-        dialogoCalendario.add(btnSeleccionar, BorderLayout.SOUTH); // Agregar el botón "Seleccionar" debajo del calendario
+        dialogoCalendario.add(btnSeleccionar, BorderLayout.SOUTH);
+        btnElegirFecha.addActionListener(e -> {
 
-        // Cuando el botón "Elegir Fecha" es presionado, mostrar el JDialog con el calendario
-        btnElegirFecha.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                dialogoCalendario.setLocationRelativeTo(ventana); // Centrar el JDialog respecto a la ventana principal
-                dialogoCalendario.setVisible(true); // Mostrar el JDialog con el calendario
-            }
+            dialogoCalendario.setLocationRelativeTo(ventana);
+            dialogoCalendario.setVisible(true);
         });
 
-        // Añadir los campos y el botón al panel usando GridBagLayout
         gbc.gridx = 0; gbc.gridy = 0;
         panelCampos.add(lblClave, gbc);
         gbc.gridx = 1; gbc.gridy = 0;
@@ -104,10 +96,9 @@ public class Interfaz {
         gbc.gridx = 1; gbc.gridy = 4;
         panelCampos.add(btnElegirFecha, gbc); 
 
-        // Crear el panel lateral para los botones (Botones en la parte lateral)
         JPanel panelBotones = new JPanel();
-        panelBotones.setLayout(new BoxLayout(panelBotones, BoxLayout.Y_AXIS)); // Layout vertical para los botones
-        panelBotones.setBorder(BorderFactory.createEmptyBorder(3, 5, 20, 10)); // Agregar borde para espaciado
+        panelBotones.setLayout(new BoxLayout(panelBotones, BoxLayout.Y_AXIS));
+        panelBotones.setBorder(BorderFactory.createEmptyBorder(3, 5, 20, 10));
 
         JButton btnNuevo = new JButton("+ Nuevo");
         JButton btnGuardar = new JButton("Guardar");
@@ -123,89 +114,113 @@ public class Interfaz {
         panelBotones.add(btnActualizar);
         panelBotones.add(btnCancelar);
         
-        
         btnGuardar.setEnabled(false);
         btnElegirFecha.setEnabled(false);
         btnCancelar.setEnabled(false);
-        // Crear la tabla para mostrar los datos
+        txtClave.setEnabled(false);
+        txtNombre.setEnabled(false);
+        txtDescripcion.setEnabled(false);
+        calendario.setEnabled(false);
+        
+        
+        
+        
         String[] columnas = {"Clave", "Nombre", "Descripción", "Fecha"};
-        DefaultTableModel modeloTabla = new DefaultTableModel(columnas, 0);
+        modeloTabla = new DefaultTableModel(columnas, 0);  
         JTable tabla = new JTable(modeloTabla);
         JScrollPane scroll = new JScrollPane(tabla);
-
-        // Organizar los componentes en la ventana
+        cargarTabla();
         ventana.setLayout(new BorderLayout(20, 20)); 
         ventana.add(panelCampos, BorderLayout.CENTER); 
         ventana.add(panelBotones, BorderLayout.EAST); 
         ventana.add(scroll, BorderLayout.SOUTH); 
 
-        // Acciones de los botones
-        btnNuevo.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Habilitar los campos y el calendario cuando se presiona "Nuevo"
-                txtClave.setEnabled(true);
-                txtNombre.setEnabled(true);
-                txtDescripcion.setEnabled(true);
-                calendario.setEnabled(true);  // Habilitar el calendario
+        btnNuevo.addActionListener(e -> {
+            txtClave.setEnabled(true);
+            txtNombre.setEnabled(true);
+            txtDescripcion.setEnabled(true);
+            calendario.setEnabled(true);
 
-                // Limpiar los campos de texto
-                txtClave.setText("");
-                txtNombre.setText("");
-                txtDescripcion.setText("");
-                calendario.setDate(new java.util.Date());  // Establece la fecha actual
+            txtClave.setText("");
+            txtNombre.setText("");
+            txtDescripcion.setText("");
+            calendario.setDate(new Date());
 
-                // Deshabilitar botones según la acción
-                btnEliminar.setEnabled(false);
-                btnGuardar.setEnabled(true);
-                btnBuscar.setEnabled(false);
-                btnActualizar.setEnabled(false);
-                btnNuevo.setEnabled(false);
-                btnElegirFecha.setEnabled(true);
-                btnCancelar.setEnabled(true);
-            }
+            btnEliminar.setEnabled(false);
+            btnGuardar.setEnabled(true);
+            btnBuscar.setEnabled(false);
+            btnActualizar.setEnabled(false);
+            btnNuevo.setEnabled(false);
+            btnElegirFecha.setEnabled(true);
+            btnCancelar.setEnabled(true);
         });
 
-        btnGuardar.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Obtener los valores de los campos
-                String clave = txtClave.getText();
-                String nombre = txtNombre.getText();
-                String descripcion = txtDescripcion.getText();
-                String fecha = calendario.getDate().toString();  // Obtiene la fecha seleccionada en el calendario
+        btnGuardar.addActionListener(e -> {
+            try {
+                Long clave = Long.parseLong(txtClave.getText().trim());
+                String nombre = txtNombre.getText().trim();
+                String descripcion = txtDescripcion.getText().trim();
+                java.sql.Date fechaSQL = java.sql.Date.valueOf(txtFecha.getText());
 
-                // Verificar si alguno de los campos está vacío
-                if (clave.isEmpty() || nombre.isEmpty() || descripcion.isEmpty() || fecha.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Por favor, completa todos los campos", "Formulario incompleto", JOptionPane.INFORMATION_MESSAGE);
-                    return;  // Detener la ejecución si hay campos vacíos
-                }
+                int status = 1;
 
-                // Si todos los campos están completos, agregar la fila a la tabla
-                modeloTabla.addRow(new Object[]{clave, nombre, descripcion, fecha});
+                ProgramaAcademico programa = new ProgramaAcademico(clave, nombre, descripcion, fechaSQL, status);
+                ProgramaAcademicoDAO dao = new ProgramaAcademicoDAO();
+                dao.create(programa);
 
-                // Lógica para habilitar y deshabilitar botones
+                cargarTabla();  
+
+                JOptionPane.showMessageDialog(null, "Registro guardado correctamente");
+
                 btnGuardar.setEnabled(false);
                 btnNuevo.setEnabled(true);
                 btnEliminar.setEnabled(true);
                 btnBuscar.setEnabled(true);
                 btnActualizar.setEnabled(true);
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(null, "Clave debe ser un número válido", "Error de formato", JOptionPane.ERROR_MESSAGE);
             }
         });
 
-
+        btnBuscar.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String clavetx = JOptionPane.showInputDialog("Ingrese la clave:");
+                Long clave = Long.parseLong(clavetx);
+                ProgramaAcademico programa = new ProgramaAcademico();
+                ProgramaAcademicoDAO dao = new ProgramaAcademicoDAO();
+                List<ProgramaAcademico> programaSeleccionado =  dao.SelectByClave(clave);
+                
+                System.out.println(programaSeleccionado);
+                
+                
+            }
+            
+        });  
+        
+        
         btnEliminar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 int row = tabla.getSelectedRow();
                 if (row >= 0) {
-                    modeloTabla.removeRow(row);
+
+                    Long clave = (Long) modeloTabla.getValueAt(row, 0);
+                    int confirm = JOptionPane.showConfirmDialog(null, 
+                        "¿Está seguro de que desea eliminar este programa?", 
+                        "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
+                    if (confirm == JOptionPane.YES_OPTION) {
+                        ProgramaAcademicoDAO dao = new ProgramaAcademicoDAO();
+                        dao.Delete(clave);
+                        cargarTabla();
+                    }
                 } else {
-                    JOptionPane.showMessageDialog(ventana, "Seleccione una fila para eliminar.");
+                    JOptionPane.showMessageDialog(null, "Seleccione una fila para eliminar.");
                 }
             }
         });
-
+        
+        
         btnCancelar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -214,10 +229,7 @@ public class Interfaz {
                 txtNombre.setText("");
                 txtDescripcion.setText("");
                 
-                // Dejar la fecha seleccionada (no la borramos)
-                // txtFecha.setText(""); // No limpiar el campo de fecha
-
-                // Deshabilitar los campos y el calendario
+                
                 txtClave.setEnabled(false);
                 txtNombre.setEnabled(false);
                 txtDescripcion.setEnabled(false);
@@ -232,24 +244,31 @@ public class Interfaz {
                 btnElegirFecha.setEnabled(false);
             }
         });
-
-
-        btnActualizar.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int row = tabla.getSelectedRow();
-                if (row >= 0) {
-                    txtClave.setText((String) modeloTabla.getValueAt(row, 0));
-                    txtNombre.setText((String) modeloTabla.getValueAt(row, 1));
-                    txtDescripcion.setText((String) modeloTabla.getValueAt(row, 2));
-                    calendario.setDate((java.util.Date) modeloTabla.getValueAt(row, 3));  // Actualiza la fecha
-                } else {
-                    JOptionPane.showMessageDialog(ventana, "Seleccione una fila para actualizar.");
-                }
-            }
-        });
-
-        // Hacer visible la ventana
         ventana.setVisible(true);
+
+    }
+    
+        
+    private void cargarTabla() {
+        ProgramaAcademicoDAO dao = new ProgramaAcademicoDAO();
+        List<ProgramaAcademico> listaProgramas = dao.Select();
+
+        modeloTabla.setRowCount(0);
+
+        for (ProgramaAcademico programa : listaProgramas) {
+            SimpleDateFormat formatoFecha = new SimpleDateFormat("yyyy-MM-dd");
+            String fechaFormateada = formatoFecha.format(programa.getFechaCreacion());
+
+            modeloTabla.addRow(new Object[]{
+                programa.getClave(),
+                programa.getNombre(),
+                programa.getDescripcion(),
+                fechaFormateada
+            });
+        }
+
+        if (listaProgramas.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "No hay programas académicos activos.", "Información", JOptionPane.INFORMATION_MESSAGE);
+        }
     }
 }
