@@ -10,7 +10,7 @@ public class ProgramaAcademicoDTO {
     ProgramaAcademico programa;
     private static final String url = "jdbc:mysql://localhost:3306/7cm1";
     private static final String usuario = "root";
-    private static final String contraseña = "admin123";
+    private static final String contraseña = "root";
     public ProgramaAcademicoDTO() {
         
     }

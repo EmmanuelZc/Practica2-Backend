@@ -9,11 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProgramaAcademicoDAO {
-    private static final String SQL_INSERT = "INSERT INTO programaacademico (clave,nombre, descripcion, fechaCreacion,status) VALUES (?,?, ?, ?,?)";
-    private static final String SQL_SELECT = "SELECT * FROM programaacademico WHERE status = 1";
-    private static final String SQL_DELETE = "UPDATE programaacademico SET status = ? WHERE clave = ?";
-    private static final String SQL_SELECT_BY_CLAVE = "SELECT * FROM programaacademico WHERE clave = ? AND status = 1";
-    
+    private static final String SQL_INSERT = "call insertar(?,?, ?, ?,?)";
+    private static final String SQL_SELECT = "call consultar()";
+    private static final String SQL_DELETE = "call elimina(?,?)";
+    private static final String SQL_SELECT_BY_CLAVE = "call selectbyID(?,?)";
+    private static final String SQL_UPDATE = "call editar(?, ?, ?, ?, ?)";
     
      public void create(ProgramaAcademico programa) {
         try (Connection conn = ProgramaAcademicoDTO.getConexion();
@@ -85,8 +85,9 @@ public class ProgramaAcademicoDAO {
 
         try (Connection conn = ProgramaAcademicoDTO.getConexion();
              PreparedStatement stmt = conn.prepareStatement(SQL_SELECT_BY_CLAVE)) {
-
+             int status = 1 ;
             stmt.setLong(1, clave);  
+            stmt.setInt(2, status);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     java.sql.Date fechaSQL = rs.getDate("fechaCreacion");
@@ -107,4 +108,25 @@ public class ProgramaAcademicoDAO {
         }
         return listaProgramas;
     }
+      
+    public void Update(ProgramaAcademico programa) {
+    try (Connection conn = ProgramaAcademicoDTO.getConexion();
+         PreparedStatement stmt = conn.prepareStatement(SQL_UPDATE)) {
+
+        stmt.setLong(1, programa.getClave());
+        stmt.setString(2, programa.getNombre());
+        stmt.setString(3, programa.getDescripcion());
+        stmt.setDate(4, new java.sql.Date(programa.getFechaCreacion().getTime())); 
+        stmt.setInt(5, programa.getStatus());
+
+        int rowsUpdated = stmt.executeUpdate();
+        if (rowsUpdated > 0) {
+            System.out.println("¡Actualización exitosa!");
+        } else {
+            System.out.println("No se encontró el programa con la clave: " + programa.getClave());
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+}
 }

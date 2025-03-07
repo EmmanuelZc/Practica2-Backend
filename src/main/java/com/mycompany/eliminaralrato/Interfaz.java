@@ -26,7 +26,7 @@ public class Interfaz {
         // Crear la ventana principal
         JFrame ventana = new JFrame("Programas Académicos");
         ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        ventana.setSize(800, 650);
+        ventana.setSize(800, 700);
 
         // Crear un panel para organizar los campos de texto
         JPanel panelCampos = new JPanel();
@@ -73,6 +73,7 @@ public class Interfaz {
             dialogoCalendario.setVisible(true);
         });
 
+        // Organizar los campos de texto y botones de la ventana
         gbc.gridx = 0; gbc.gridy = 0;
         panelCampos.add(lblClave, gbc);
         gbc.gridx = 1; gbc.gridy = 0;
@@ -98,8 +99,8 @@ public class Interfaz {
 
         JPanel panelBotones = new JPanel();
         panelBotones.setLayout(new BoxLayout(panelBotones, BoxLayout.Y_AXIS));
-        panelBotones.setBorder(BorderFactory.createEmptyBorder(3, 5, 20, 10));
-
+        panelBotones.setBorder(BorderFactory.createEmptyBorder(5, 5, 100, 30));
+        
         JButton btnNuevo = new JButton("+ Nuevo");
         JButton btnGuardar = new JButton("Guardar");
         JButton btnEliminar = new JButton("Eliminar");
@@ -123,14 +124,17 @@ public class Interfaz {
         calendario.setEnabled(false);
         
         
-        
-        
         String[] columnas = {"Clave", "Nombre", "Descripción", "Fecha"};
         modeloTabla = new DefaultTableModel(columnas, 0);  
         JTable tabla = new JTable(modeloTabla);
         JScrollPane scroll = new JScrollPane(tabla);
         cargarTabla();
         ventana.setLayout(new BorderLayout(20, 20)); 
+        JPanel panelTabla = new JPanel(new BorderLayout());
+        panelTabla.setBorder(BorderFactory.createEmptyBorder(100, 0, 0, 0)); 
+        panelTabla.add(scroll, BorderLayout.CENTER);
+        
+        
         ventana.add(panelCampos, BorderLayout.CENTER); 
         ventana.add(panelBotones, BorderLayout.EAST); 
         ventana.add(scroll, BorderLayout.SOUTH); 
@@ -171,12 +175,16 @@ public class Interfaz {
                 cargarTabla();  
 
                 JOptionPane.showMessageDialog(null, "Registro guardado correctamente");
-
+                txtClave.setText("");
+                txtNombre.setText("");
+                txtDescripcion.setText("");
                 btnGuardar.setEnabled(false);
                 btnNuevo.setEnabled(true);
+                btnCancelar.setEnabled(false);
                 btnEliminar.setEnabled(true);
                 btnBuscar.setEnabled(true);
                 btnActualizar.setEnabled(true);
+                btnElegirFecha.setEnabled(false);
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(null, "Clave debe ser un número válido", "Error de formato", JOptionPane.ERROR_MESSAGE);
             }
@@ -194,11 +202,12 @@ public class Interfaz {
 
                 if (programaSeleccionado.isEmpty()) {
                     JOptionPane.showMessageDialog(null, "No se encontraron resultados", "Búsqueda", JOptionPane.INFORMATION_MESSAGE);
+                    cargarTabla();
                 } else {
                     for (ProgramaAcademico programa : programaSeleccionado) {
                         SimpleDateFormat formatoFecha = new SimpleDateFormat("yyyy-MM-dd");
                         String fechaFormateada = formatoFecha.format(programa.getFechaCreacion());
-
+                        
                         modeloTabla.addRow(new Object[]{
                             programa.getClave(),
                             programa.getNombre(),
@@ -206,13 +215,14 @@ public class Interfaz {
                             fechaFormateada
                         });
                     }
+                    btnCancelar.setEnabled(true);
                 }
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(null, "Ingrese un número válido para la clave", "Error", JOptionPane.ERROR_MESSAGE);
             }
         }); 
         
-        
+        JButton btnGuardarCambios = new JButton("Guardar Cambios");
         btnEliminar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -234,6 +244,73 @@ public class Interfaz {
             }
         });
         
+        btnActualizar.addActionListener(e -> {
+    int row = tabla.getSelectedRow();
+    if (row >= 0) {
+        txtClave.setText(modeloTabla.getValueAt(row, 0).toString());
+        txtNombre.setText(modeloTabla.getValueAt(row, 1).toString());
+        txtDescripcion.setText(modeloTabla.getValueAt(row, 2).toString());
+        txtFecha.setText(modeloTabla.getValueAt(row, 3).toString());
+
+        txtClave.setEnabled(false); 
+        txtNombre.setEnabled(true);
+        txtDescripcion.setEnabled(true);
+        btnElegirFecha.setEnabled(true);
+        btnGuardar.setEnabled(false);
+        btnEliminar.setEnabled(false);
+        btnBuscar.setEnabled(false);
+        btnNuevo.setEnabled(false);
+        btnActualizar.setEnabled(false);
+        btnCancelar.setEnabled(true);
+
+        // Agregar botón para guardar cambios
+        
+        panelBotones.add(btnGuardarCambios);
+        panelBotones.revalidate();
+        panelBotones.repaint();
+
+        // Agregar acción al botón de guardar cambios
+        btnGuardarCambios.addActionListener(ev -> {
+            try {
+                Long clave = Long.parseLong(txtClave.getText().trim());
+                String nombre = txtNombre.getText().trim();
+                String descripcion = txtDescripcion.getText().trim();
+                java.sql.Date fechaSQL = java.sql.Date.valueOf(txtFecha.getText());
+                int status = 1;
+
+                ProgramaAcademico programa = new ProgramaAcademico(clave, nombre, descripcion, fechaSQL, status);
+                ProgramaAcademicoDAO dao = new ProgramaAcademicoDAO();
+                dao.Update(programa);
+
+                cargarTabla();
+                JOptionPane.showMessageDialog(null, "Registro actualizado correctamente");
+
+                // Restaurar estado inicial de botones y campos
+                txtClave.setEnabled(false);
+                txtNombre.setEnabled(false);
+                txtDescripcion.setEnabled(false);
+                btnElegirFecha.setEnabled(false);
+                btnGuardar.setEnabled(false);
+                btnEliminar.setEnabled(true);
+                btnBuscar.setEnabled(true);
+                btnNuevo.setEnabled(true);
+                btnActualizar.setEnabled(true);
+                btnCancelar.setEnabled(false);
+
+                // Remover el botón de "Guardar Cambios" para que no quede visible
+                panelBotones.remove(btnGuardarCambios);
+                panelBotones.revalidate();
+                panelBotones.repaint();
+
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(null, "Clave debe ser un número válido", "Error de formato", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+    } else {
+        JOptionPane.showMessageDialog(null, "Seleccione un programa para editar.");
+    }
+});
+
         
         btnCancelar.addActionListener(new ActionListener() {
             @Override
@@ -255,14 +332,15 @@ public class Interfaz {
                 btnActualizar.setEnabled(true);
                 btnNuevo.setEnabled(true);
                 btnCancelar.setEnabled(false);
+                btnGuardarCambios.setEnabled(false);
                 btnElegirFecha.setEnabled(false);
+                cargarTabla();
             }
         });
         ventana.setVisible(true);
-
     }
+                        
     
-        
     private void cargarTabla() {
         ProgramaAcademicoDAO dao = new ProgramaAcademicoDAO();
         List<ProgramaAcademico> listaProgramas = dao.Select();
@@ -285,4 +363,8 @@ public class Interfaz {
             JOptionPane.showMessageDialog(null, "No hay programas académicos activos.", "Información", JOptionPane.INFORMATION_MESSAGE);
         }
     }
+    
+    
+    
+
 }
